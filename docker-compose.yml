@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  bot:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    container_name: WA_bot
+    ports:
+      - "5200:5200"
+    environment:
+      - OPENAI_API_KEY=!!put_your_own_key_here!!
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - bot_network
+  
+  database:
+    image: mysql:9.0
+    container_name: Database
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: bot_db
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - bot_network
+    
+  # ntfy:
+  #   image: binwiederhier/ntfy
+  #   container_name: ntfy
+  #   command:
+  #     - serve
+  #   volumes:
+  #     - /var/cache/ntfy:/var/cache/ntfy
+  #     - /etc/ntfy:/etc/ntfy
+  #   ports:
+  #     - 80:80
+  #   upstream-base-url: "https://ntfy.sh"
+  #   restart: unless-stopped
+
+volumes:
+  db_data:
+
+networks:
+  bot_network:
